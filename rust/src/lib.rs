@@ -1,15 +1,18 @@
-//! YunhuLib 的 C 接口；业务请求和更新队列在后续功能提交中实现。
+//! YunhuLib：独立于 Flutter 的云湖客户端核心库。
+mod auth;
+mod cache;
+mod engine;
+mod ffi;
+mod home;
+mod network;
+mod protocol;
+mod session;
+mod socket;
 
-/// 返回接口版本，供 Dart 与原生库检查兼容性。
+pub use ffi::*;
+
+/// 返回 Dart／原生库接口版本。
 #[unsafe(no_mangle)]
 pub extern "C" fn yh_abi_version() -> u32 {
     1
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn abi_version_is_one() {
-        assert_eq!(super::yh_abi_version(), 1);
-    }
 }

@@ -24,3 +24,9 @@
 ## CI
 
 优先参考 [HyDownloader](https://github.com/html5syt/HyDownloader) 的 Release 工作流：固定 Flutter、按 tag／提交元数据发布、多平台产物、GitHub Secrets 中的 Android 签名配置。
+
+## 本次 UI 依据
+
+使用当前 Telegram master 的 ThemeColors 白色顶部栏，主色 `0xff229af0`、文字 `0xff1a1d21`、消息摘要 `0xff75787a`、分隔线 `0xffd9d9d9`。DialogCell 的名称／消息字体采用 17／16，UserCell 采用 16／15。图标直接使用 DrKLO/Telegram 中的 xxhdpi WebP 资源，不使用 Material 或 Cupertino 图标库。
+
+真实滑动验证码接口已验证返回 code=1，背景尺寸为 300×220；拼图尺寸由接口动态返回，不硬编码。

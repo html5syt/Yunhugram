@@ -1,17 +1,12 @@
+import 'dart:async';
 import 'package:flutter/widgets.dart';
+import 'app/app.dart';
+import 'app/controller.dart';
 
-/// 启动入口；使用基础 Widgets，不采用 Material 或 Cupertino 组件库。
+/// 系统插件与 Dart FFI 初始化后，按真实登录状态选择页面。
 void main() {
-  runApp(
-    WidgetsApp(
-      color: Color(0xff527da3),
-      debugShowCheckedModeBanner: false,
-      builder: _build,
-    ),
-  );
+  WidgetsFlutterBinding.ensureInitialized();
+  final controller = AppController();
+  runApp(YunhugramApp(controller: controller));
+  unawaited(controller.initialize());
 }
-
-Widget _build(BuildContext context, Widget? child) => const ColoredBox(
-  color: Color(0xffffffff),
-  child: Center(child: Text('Yunhugram')),
-);
