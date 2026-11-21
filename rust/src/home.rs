@@ -11,6 +11,25 @@ use serde_json::{Value, json};
 impl Engine {
     pub async fn home_command(&mut self, kind: &str, args: &Value) -> Result<Value> {
         match kind {
+            "getMessages" | "sendMessage" => self.message_command(kind, args).await,
+            "createBot" => {
+                let request = crate::protocol::CreateBot {
+                    name: required(args, "name")?.into(),
+                    introduction: args["introduction"].as_str().unwrap_or_default().into(),
+                    avatar_url: args["avatarUrl"].as_str().unwrap_or_default().into(),
+                    private: args["private"] == true,
+                };
+                let response: crate::protocol::StatusResponse = self
+                    .net
+                    .protobuf(
+                        "v1/bot/create-bot",
+                        &self.token,
+                        Method::POST,
+                        request.encode_to_vec(),
+                    )
+                    .await?;
+                Ok(json!({"created":response.status.is_some()}))
+            }
             "getSelf" => Ok(json!(self.user)),
             "getConversations" | "getContacts" => {
                 let key = if kind == "getContacts" {

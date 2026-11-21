@@ -30,3 +30,5 @@
 使用当前 Telegram master 的 ThemeColors 白色顶部栏，主色 `0xff229af0`、文字 `0xff1a1d21`、消息摘要 `0xff75787a`、分隔线 `0xffd9d9d9`。DialogCell 的名称／消息字体采用 17／16，UserCell 采用 16／15。图标直接使用 DrKLO/Telegram 中的 xxhdpi WebP 资源，不使用 Material 或 Cupertino 图标库。
 
 真实滑动验证码接口已验证返回 code=1，背景尺寸为 300×220；拼图尺寸由接口动态返回，不硬编码。
+
+桌面布局已直接核对 telegramdesktop/tdesktop：window.style 的左栏最小 260、聊天栏最小 380，core_settings.h 的初始比例 5/14；因此宽度小于 640 时采用单栏。栏宽可拖动调整；本次未额外宣称未验证的第三栏功能。

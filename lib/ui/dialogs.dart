@@ -19,7 +19,14 @@ Future<T?> showTgPanel<T>(
     child: Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.sizeOf(context).width.clamp(0, 400) - 32,
+          maxWidth: MediaQuery.sizeOf(context).width.clamp(32, 400) - 32,
+          maxHeight:
+              (MediaQuery.sizeOf(context).height -
+                      MediaQuery.viewInsetsOf(context).bottom -
+                      MediaQuery.paddingOf(context).vertical -
+                      32)
+                  .clamp(64, double.infinity)
+                  .toDouble(),
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(
@@ -31,7 +38,7 @@ Future<T?> showTgPanel<T>(
           ),
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: builder(context),
+            child: SingleChildScrollView(child: builder(context)),
           ),
         ),
       ),

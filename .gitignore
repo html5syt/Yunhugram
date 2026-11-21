@@ -20,3 +20,6 @@ android/key.properties
 android/local.properties
 *.log
 .DS_Store
+
+.flutter-plugins
+.flutter-plugins-dependencies

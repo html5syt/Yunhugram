@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import '../features/auth/page.dart';
+import '../features/home/page.dart';
 import '../l10n/strings.dart';
 import '../ui/button.dart';
 import '../ui/dialogs.dart';
@@ -62,8 +63,7 @@ class _Root extends StatelessWidget {
           onLanguage: controller.toggleLanguage,
         );
       case AppPhase.home:
-        // TODO(主页阶段)：下一功能提交替换此占位，不伪装为已完成的主页。
-        content = Center(child: Text(s('chats')));
+        content = HomePage(app: controller, strings: s);
       case AppPhase.error:
         content = SafeArea(
           child: Center(

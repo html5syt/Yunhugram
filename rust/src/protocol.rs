@@ -1,9 +1,11 @@
 //! 按职责组织云湖客户端 Protobuf 协议。
 mod account;
 mod lists;
+mod messages;
 mod websocket;
 pub use account::*;
 pub use lists::*;
+pub use messages::*;
 pub use websocket::*;
 #[cfg(test)]
 mod tests {

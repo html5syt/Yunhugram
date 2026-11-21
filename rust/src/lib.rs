@@ -4,6 +4,7 @@ mod cache;
 mod engine;
 mod ffi;
 mod home;
+mod messages;
 mod network;
 mod protocol;
 mod session;
