@@ -9,6 +9,10 @@ import 'navigation.dart';
 import 'profile.dart';
 import 'search.dart';
 import 'toolbar.dart';
+import '../contacts/page.dart';
+import '../contacts/add_panel.dart';
+import '../../ui/dialogs.dart';
+import '../contacts/invitations.dart';
 
 /// 主页侧栏的显示组合；业务与异步状态由控制器管理。
 class HomePanel extends StatelessWidget {
@@ -17,6 +21,7 @@ class HomePanel extends StatelessWidget {
     required this.home,
     required this.strings,
     required this.tab,
+    required this.sortName,
     required this.search,
     required this.searching,
     required this.input,
@@ -35,6 +40,7 @@ class HomePanel extends StatelessWidget {
   final HomeController home;
   final Strings strings;
   final int tab;
+  final bool sortName;
   final HomeSearch search;
   final bool searching;
   final TextEditingController input;
@@ -85,8 +91,29 @@ class HomePanel extends StatelessWidget {
                     onDelete: onDelete,
                     selected: selected,
                   ),
-                  // TODO(联系人阶段)：下一功能提交替换此入口占位。
-                  _placeholder('contacts'),
+                  ContactsView(
+                    home: home,
+                    strings: strings,
+                    sortName: sortName,
+                    onOpen: onOpen,
+                    onInvite: (target) =>
+                        inviteFriend(context, app.client!, target, strings),
+                    selected: selected,
+                    onAdd: () async {
+                      final added = await showTgPanel<bool>(
+                        context,
+                        (_) => AddContactPanel(
+                          client: app.client!,
+                          strings: strings,
+                        ),
+                        label: strings('addContact'),
+                      );
+                      if (added == true && context.mounted) {
+                        await noticeTg(context, strings, strings('added'));
+                        await home.refresh(force: true);
+                      }
+                    },
+                  ),
                   _placeholder('community'),
                   _placeholder('discover'),
                   ProfileView(app: app, strings: strings),

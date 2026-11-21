@@ -65,6 +65,7 @@ impl Engine {
                 self.save_cache();
                 Ok(json!({"list":data}))
             }
+            "addContact" => self.net.json("v1/friend/apply",&self.token,json!({"chatId":required(args,"chatId")?,"chatType":args["chatType"],"remark":args["remark"].as_str().unwrap_or_default()})).await,
             "search" => {
                 self.net
                     .json(

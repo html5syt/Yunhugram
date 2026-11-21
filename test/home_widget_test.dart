@@ -44,6 +44,10 @@ void main() {
     ]) {
       expect(find.byKey(ValueKey('nav_$key')), findsOneWidget);
     }
+    await tester.tap(find.byKey(const ValueKey('nav_contacts')));
+    await tester.pumpAndSettle();
+    expect(find.text('邀请微信好友'), findsOneWidget);
+    expect(find.text('邀请QQ好友'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('nav_profile')));
     await tester.pumpAndSettle();
     final settings = find.byKey(const ValueKey('settings'));

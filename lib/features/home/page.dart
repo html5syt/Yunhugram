@@ -175,6 +175,7 @@ class _HomePageState extends State<HomePage> {
           home: _home,
           strings: s,
           tab: _tab,
+          sortName: _sortName,
           search: _search,
           searching: _searching,
           input: _input,

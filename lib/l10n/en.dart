@@ -1,5 +1,8 @@
 /// 英文界面文本。
 const enStrings = {
+  'inviteCopied': 'Invitation link copied. Send it to your friend.',
+  'idRequired': 'Enter a Yunhu ID',
+  'inviteText': 'Add me as a friend on Yunhu: ',
   'recalled': 'Message deleted',
   'more': 'More',
   'groups': 'Groups',
