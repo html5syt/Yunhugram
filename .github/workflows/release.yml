@@ -1,0 +1,177 @@
+name: 正式版本发布
+on:
+  push:
+    branches: [main, master]
+    tags: ['v[0-9]*.[0-9]*.[0-9]*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 已存在的版本 tag
+        required: true
+        default: v0.1.0
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref }}
+  cancel-in-progress: false
+env:
+  FLUTTER_VERSION: '3.44.1'
+  CARGO_BUILD_JOBS: '4'
+  PUB_HOSTED_URL: https://pub.dev
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.resolve.outputs.release }}
+      tag: ${{ steps.resolve.outputs.tag }}
+      sha: ${{ steps.resolve.outputs.sha }}
+      version: ${{ steps.resolve.outputs.version }}
+      draft: ${{ steps.resolve.outputs.draft }}
+      prerelease: ${{ steps.resolve.outputs.prerelease }}
+      android_signed: ${{ steps.resolve.outputs.android_signed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.sha }}
+          fetch-depth: 0
+      - id: resolve
+        env:
+          MANUAL_TAG: ${{ github.event.inputs.tag }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: python3 scripts/release_metadata.py
+  desktop:
+    needs: metadata
+    if: needs.metadata.outputs.release == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+          - os: ubuntu-latest
+            platform: linux
+          - os: macos-latest
+            platform: macos
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.metadata.outputs.sha }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.100.0'
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust -> target
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Linux 依赖
+        if: matrix.platform == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libsecret-1-dev liblzma-dev
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build ${{ matrix.platform }} --release --no-pub
+      - name: Windows 打包
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+          $source = (Resolve-Path -LiteralPath 'build/windows/x64/runner/Release').Path
+          Compress-Archive -LiteralPath $source -DestinationPath 'dist/Yunhugram-windows-x64.zip' -Force
+      - name: Linux 打包
+        if: matrix.platform == 'linux'
+        run: mkdir -p dist && tar -czf dist/Yunhugram-linux-x64.tar.gz -C build/linux/x64/release/bundle .
+      - name: macOS 打包
+        if: matrix.platform == 'macos'
+        run: |
+          mkdir -p dist
+          APP=$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' -print -quit)
+          ditto -c -k --sequesterRsrc --keepParent "$APP" dist/Yunhugram-macos.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.platform }}
+          path: dist/
+          if-no-files-found: error
+  android:
+    needs: metadata
+    if: needs.metadata.outputs.release == 'true' && needs.metadata.outputs.android_signed == 'true'
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      YH_REQUIRE_SIGNING: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.metadata.outputs.sha }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.100.0'
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust -> target
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: 准备签名
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/yunhugram-release.jks
+        run: |
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
+          printf 'ANDROID_KEYSTORE_PATH=%s\n' "$ANDROID_KEYSTORE_PATH" >> "$GITHUB_ENV"
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build apk --release --no-pub
+      - name: 验证签名
+        run: |
+          SIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          "$SIGNER" verify --verbose build/app/outputs/flutter-apk/app-release.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-android
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+  publish:
+    needs: [metadata, desktop, android]
+    if: always() && needs.metadata.outputs.release == 'true' && needs.desktop.result == 'success' && (needs.android.result == 'success' || needs.android.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: dist
+          merge-multiple: true
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.metadata.outputs.sha }}
+          path: source
+      - name: 生成发布说明
+        env:
+          SIGNED: ${{ needs.metadata.outputs.android_signed }}
+        run: |
+          cp source/docs/release-0.1.0.md release-notes.md
+          if [ "$SIGNED" != true ]; then
+            printf '\nAndroid 正式安装包将在仓库配置签名密钥后补充；本次没有使用调试密钥代替正式签名。\n' >> release-notes.md
+          fi
+          sha256sum dist/* > dist/SHA256SUMS.txt
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.metadata.outputs.tag }}
+          target_commitish: ${{ needs.metadata.outputs.sha }}
+          name: ${{ needs.metadata.outputs.tag }}
+          draft: ${{ needs.metadata.outputs.draft == 'true' }}
+          prerelease: ${{ needs.metadata.outputs.prerelease == 'true' }}
+          body_path: release-notes.md
+          files: dist/*
