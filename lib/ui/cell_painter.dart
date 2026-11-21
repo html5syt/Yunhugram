@@ -66,9 +66,10 @@ class CellPainter extends CustomPainter {
       _width = size.width;
     }
     final center = size.height / 2;
-    _title!.paint(canvas, Offset(0, center - 25));
-    _subtitle!.paint(canvas, Offset(0, center + 1));
-    _date!.paint(canvas, Offset(size.width - _date!.width - 12, center - 22));
+    final titleY = (size.height - _title!.height - _subtitle!.height - 4) / 2;
+    _title!.paint(canvas, Offset(0, titleY));
+    _subtitle!.paint(canvas, Offset(0, titleY + _title!.height + 4));
+    _date!.paint(canvas, Offset(size.width - _date!.width - 12, titleY + 2));
     if (unread > 0 || mentioned) {
       final width = (_count!.width + 12)
           .clamp(22.0, double.infinity)

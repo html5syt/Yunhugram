@@ -11,10 +11,11 @@ enum AppPhase { starting, login, home, error }
 class AppController extends ChangeNotifier {
   AppPhase phase = AppPhase.starting;
   Locale locale = const Locale('zh');
-  final credentials = const Credentials();
+  final credentials = Credentials();
   CoreClient? client;
   Map<String, dynamic>? user;
   String? error;
+  final warning = ValueNotifier<String?>(null);
   int generation = 0;
   StreamSubscription<Map<String, dynamic>>? _subscription;
   bool _disposed = false;
@@ -26,6 +27,7 @@ class AppController extends ChangeNotifier {
     error = null;
     notifyListeners();
     try {
+      locale = Locale(await credentials.readLanguage() ?? 'zh');
       if (client == null) {
         final directory = await getApplicationSupportDirectory();
         final device = await credentials.deviceId();
@@ -35,11 +37,22 @@ class AppController extends ChangeNotifier {
           'cache_dir': directory.path,
         });
         _subscription = client!.updates.listen((event) {
+          if (event['@type'] == 'updateWarning') {
+            warning.value = event['message'] as String;
+          }
           if (event['@type'] == 'updateAuthorization' &&
               event['state'] == 'loginRequired') {
             user = null;
             phase = AppPhase.login;
-            unawaited(credentials.clearToken());
+            unawaited(
+              credentials.clearToken().catchError((Object _) {
+                if (!_disposed) {
+                  phase = AppPhase.error;
+                  error = '无法清除本机登录信息，请检查系统安全存储权限';
+                  notifyListeners();
+                }
+              }),
+            );
             if (!_disposed) notifyListeners();
           }
         });
@@ -90,6 +103,11 @@ class AppController extends ChangeNotifier {
   void toggleLanguage() {
     locale = Locale(locale.languageCode == 'zh' ? 'en' : 'zh');
     notifyListeners();
+    unawaited(
+      credentials.saveLanguage(locale.languageCode).catchError((Object _) {
+        warning.value = '无法保存语言选择，请检查系统安全存储权限';
+      }),
+    );
   }
 
   Future<void> logout() async {
@@ -114,6 +132,7 @@ class AppController extends ChangeNotifier {
     _disposed = true;
     _subscription?.cancel();
     client?.dispose();
+    warning.dispose();
     super.dispose();
   }
 }

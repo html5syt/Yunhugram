@@ -143,5 +143,5 @@ pub fn required<'a>(args: &'a Value, key: &str) -> Result<&'a str> {
     args[key]
         .as_str()
         .filter(|s| !s.is_empty())
-        .ok_or_else(|| CoreError::new("request", format!("缺少 {key}")))
+        .ok_or_else(|| CoreError::new("request", "操作参数不完整，请重试"))
 }

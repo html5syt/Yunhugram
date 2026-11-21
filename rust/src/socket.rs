@@ -79,6 +79,11 @@ pub async fn run(
             &queue,
             json!({"@type":"updateConnection","state":"waiting","generation":generation}),
         );
+        // 断开后让 HTTP 接口核验会话，不把“数据不合法”直接当作失效凭据。
+        publish(
+            &queue,
+            json!({"@type":"updateRefresh","generation":generation,"reason":"connectionClosed"}),
+        );
         tokio::time::sleep(Duration::from_secs(delay)).await;
         delay = (delay * 2).min(30);
     }

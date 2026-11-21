@@ -22,11 +22,7 @@ class YunhugramApp extends StatelessWidget {
       title: 'Yunhugram',
       locale: controller.locale,
       supportedLocales: const [Locale('zh'), Locale('en')],
-      localizationsDelegates: const [
-        GlobalWidgetsLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+      localizationsDelegates: const [GlobalWidgetsLocalizations.delegate],
       textStyle: Tg.text(16),
       onGenerateRoute: (settings) => PageRouteBuilder<void>(
         settings: settings,
@@ -102,6 +98,40 @@ class _Root extends StatelessWidget {
           ),
         );
     }
-    return ColoredBox(color: Tg.background, child: content);
+    return ColoredBox(
+      color: Tg.background,
+      child: Column(
+        children: [
+          ValueListenableBuilder<String?>(
+            valueListenable: controller.warning,
+            builder: (context, warning, _) {
+              if (warning == null) return const SizedBox.shrink();
+              return SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Row(
+                    children: [
+                      Text('! ', style: Tg.text(16, color: Tg.danger)),
+                      Expanded(
+                        child: Text(
+                          warning,
+                          style: Tg.text(14, color: Tg.danger),
+                        ),
+                      ),
+                      TgTextButton(
+                        s('dismiss'),
+                        onPressed: () => controller.warning.value = null,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          Expanded(child: content),
+        ],
+      ),
+    );
   }
 }

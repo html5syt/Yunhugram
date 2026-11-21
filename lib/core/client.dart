@@ -26,7 +26,7 @@ class ClientError implements Exception {
 class YhClient implements CoreClient {
   YhClient(Map<String, dynamic> config) {
     if (yhAbiVersion() != 1) {
-      throw const ClientError('configuration', '核心库版本不匹配');
+      throw const ClientError('configuration', '应用文件版本不一致，请重新安装');
     }
     final input = jsonEncode(config).toNativeUtf8();
     try {
@@ -35,7 +35,7 @@ class YhClient implements CoreClient {
       calloc.free(input);
     }
     if (_handle == nullptr) {
-      throw const ClientError('configuration', '无法启动核心库');
+      throw const ClientError('configuration', '无法启动应用，请检查安装文件后重试');
     }
     _timer = Timer.periodic(const Duration(milliseconds: 40), (_) => _drain());
   }

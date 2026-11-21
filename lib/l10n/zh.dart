@@ -1,6 +1,7 @@
 /// 默认中文界面文本。
 const zhStrings = {
   'inviteCopied': '邀请链接已复制，请发送给好友',
+  'dismiss': '关闭',
   'idRequired': '请输入云湖号',
   'inviteText': '点击链接添加我为云湖好友：',
   'recalled': '消息已撤回',
