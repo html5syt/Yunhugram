@@ -63,7 +63,9 @@ Windows 的安全存储插件需要 Visual Studio ATL。本机已仅补齐该组
 - Flutter／Dart 15 项自动检查通过，含安全存储写入顺序与失败重试。
 - Rust 11 项核心检查通过，Clippy 无警告。
 - 发布条件 4 项检查通过，普通提交不误触发正式发布，tag 与提交元数据可识别。
-- Windows 调试版本已生成；Android 正在验证。
+- Windows 和 Android 调试版本均已生成；Android 关闭跨磁盘 Kotlin 增量缓存后检查通过。
 - 不删除增量缓存：Windows 跨磁盘 Kotlin 路径问题通过关闭相关增量缓存解决。
 
 首次使用的术语：Dart FFI 是跨语言调用接口；Protobuf 是云湖使用的数据格式；MD5 是用于识别列表是否变化的摘要；CI 是自动检查和生成安装包的流程。命令、接口字段、文件名与工具名保留原文。
+
+公开仓库的依赖记录统一使用 pub.dev，包版本和 SHA-256 校验值保持不变。本机如使用镜像，在更新依赖记录或验证 CI 时临时设置 PUB_HOSTED_URL=https://pub.dev；不修改全局工具配置。
