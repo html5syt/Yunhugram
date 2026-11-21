@@ -1,0 +1,38 @@
+name: yunhugram
+description: Telegram 风格的云湖客户端，Flutter 界面与 Rust 核心库。
+publish_to: none
+version: 0.1.0+1
+environment:
+  sdk: ^3.12.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  ffi: ^2.1.4
+  flutter_secure_storage: ^10.0.0
+  path_provider: ^2.1.5
+  share_plus: ^12.0.1
+  url_launcher: ^6.3.2
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  hooks: 2.0.2
+  native_toolchain_rust: 1.0.4+0
+  flutter_launcher_icons: ^0.14.4
+flutter:
+  assets:
+    - assets/app_icon.png
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/app_icon.png
+  remove_alpha_ios: true
+  windows:
+    generate: true
+    image_path: assets/app_icon.png
+    icon_size: 256
+  macos:
+    generate: true
+    image_path: assets/app_icon.png

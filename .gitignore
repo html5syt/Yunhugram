@@ -1,0 +1,22 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+*.iml
+.idea/
+# 本机参考代码、原始样本与分析缓存不进入公开仓库
+.references/
+# Rust
+rust/target/
+# 凭据与本机设置
+.env
+.env.*
+*.jks
+*.keystore
+android/key.properties
+android/local.properties
+*.log
+.DS_Store

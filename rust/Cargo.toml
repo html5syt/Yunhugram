@@ -1,0 +1,14 @@
+[package]
+name = "yhlib"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-2.0-or-later"
+description = "YunhuLib: 云湖客户端核心库"
+
+[lib]
+crate-type = ["cdylib", "staticlib", "rlib"]
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "debuginfo"

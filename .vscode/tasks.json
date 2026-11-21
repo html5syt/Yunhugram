@@ -1,0 +1,43 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "检查 Rust 核心库",
+      "type": "shell",
+      "command": "cargo",
+      "args": [
+        "test",
+        "--manifest-path",
+        "rust/Cargo.toml"
+      ],
+      "group": "test",
+      "problemMatcher": [
+        "$rustc"
+      ]
+    },
+    {
+      "label": "生成 Windows 调试版本",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "build",
+        "windows",
+        "--debug"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "生成 Android 调试版本",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "build",
+        "apk",
+        "--debug"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}
