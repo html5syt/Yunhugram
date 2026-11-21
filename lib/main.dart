@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 /// 启动入口；使用基础 Widgets，不采用 Material 或 Cupertino 组件库。
 void main() {
   runApp(
-    const WidgetsApp(
+    WidgetsApp(
       color: Color(0xff527da3),
       debugShowCheckedModeBanner: false,
       builder: _build,
